@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 import pickle
 import re
 import nltk
@@ -27,39 +26,11 @@ with open('.github/svm_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
 st.title("Abstract Classification System")
-st.write("Upload a dataset of abstracts or paste a single abstract to predict its category (Science, Business, or Social Science).")
+st.write("Paste a single research abstract below to predict its category (Science, Business, or Social Science).")
 
-uploaded_file = st.file_uploader("Upload CSV file (Must contain an 'Abstract' column)")
+user_input = st.text_area("Paste abstract here:")
 
-if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
-    st.write("Uploaded Data Preview:")
-    st.dataframe(df.head())
-    
-    if st.button("Predict Uploaded File"):
-        if 'Abstract' in df.columns:
-            df['Cleaned'] = df['Abstract'].apply(preprocess_text)
-            features = tfidf.transform(df['Cleaned'])
-            df['Predicted_Category'] = model.predict(features)
-            
-            st.write("Prediction Results:")
-            st.dataframe(df[['Abstract', 'Predicted_Category']])
-            
-            csv = df.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="Download Predictions as CSV",
-                data=csv,
-                file_name='predicted_abstracts.csv',
-                mime='text/csv',
-            )
-        else:
-            st.error("The uploaded CSV must have a column named 'Abstract'.")
-
-
-
-user_input = st.text_area("Or paste a single abstract here:")
-
-if st.button("Predict Single Abstract"):
+if st.button("Predict Abstract"):
     if user_input.strip() != "":
         cleaned_input = preprocess_text(user_input)
         vectorized_input = tfidf.transform([cleaned_input])
